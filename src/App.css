@@ -1,7 +1,9 @@
 .App {
   text-align: center;
 }
-
+.notiflix-report-overlay {
+  background: rgb(49 46 57 / 40%) !important;
+}
 .App-logo {
   height: 40vmin;
   pointer-events: none;

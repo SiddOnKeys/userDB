@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/authContext";
-import { Pie, Line } from "react-chartjs-2";
+import { Pie, Line, Bar, Radar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -10,7 +10,17 @@ import {
   PointElement,
   LinearScale,
   CategoryScale,
+  BarElement,
+  RadialLinearScale,
 } from "chart.js";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardTitle,
+} from "../../shadCn/components/card"; // Import Card components from shadcn
+import Notiflix from "notiflix";
+import { doGetUserList } from "../../firebase/auth";
 
 // Register the required components
 ChartJS.register(
@@ -20,133 +30,233 @@ ChartJS.register(
   LineElement,
   PointElement,
   LinearScale,
-  CategoryScale
+  CategoryScale,
+  BarElement,
+  RadialLinearScale
 );
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
 
-  // Dummy data for charts
-  const pieData1 = {
-    labels: ["Red", "Blue", "Yellow"],
-    datasets: [
-      {
-        data: [300, 50, 100],
-        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
-        hoverBackgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
-      },
-    ],
+  const [loading, setLoading] = useState(false);
+  const [userData, setUserData] = useState([]); // State to hold user data
+  const [chartData, setChartData] = useState({
+    barData: {},
+    radarData: {},
+    lineData: {},
+  });
+  const colors = {
+    popover: "#6d28d9", // --popover
+    popoverForeground: "#f9fafb", // --popover-foreground
   };
-
-  const pieData2 = {
-    labels: ["Green", "Purple", "Orange"],
-    datasets: [
-      {
-        data: [200, 150, 100],
-        backgroundColor: ["#4BC0C0", "#9966FF", "#FF9F40"],
-        hoverBackgroundColor: ["#4BC0C0", "#9966FF", "#FF9F40"],
-      },
-    ],
-  };
-
-  const lineData = {
-    labels: ["January", "February", "March", "April", "May", "June", "July"],
-    datasets: [
-      {
-        label: "Sales",
-        fill: false,
-        lineTension: 0.1,
-        backgroundColor: "rgba(75,192,192,0.4)",
-        borderColor: "#36A2EB",
-        borderCapStyle: "butt",
-        borderWidth: 2,
-        data: [65, 59, 80, 81, 56, 55, 40],
-      },
-    ],
-  };
-
   const lineOptions = {
-    // maintainAspectRatio: false,
-    // height: "300px",
-    // aspectRatio: 16 | 9,
     scales: {
       y: {
         beginAtZero: true,
       },
     },
+    maintainAspectRatio: true,
   };
 
+  const radarOptions = {
+    scales: {
+      r: {
+        beginAtZero: true,
+        label: {
+          font: {
+            size: 16, // Change this to your desired font size
+          },
+        },
+        ticks: {
+          // Adjust the font size of the labels
+          font: {
+            size: 16, // Change this to your desired font size
+          },
+        },
+        grid: {
+          // Optional: Customize the grid lines
+          borderWidth: 1,
+          color: "grey", // Change grid color if needed
+        },
+        angleLines: {
+          color: colors.popoverForeground, // Change the color of the angle lines if needed
+        },
+      },
+    },
+    plugins: {
+      legend: {
+        labels: {
+          font: {
+            size: 16, // Change this to your desired font size for the legend labels
+          },
+        },
+      },
+    },
+    responsive: true,
+    maintainAspectRatio: true,
+  };
+
+  const refreshData = async () => {
+    setLoading(true);
+    const userList = await doGetUserList();
+    setUserData(userList); // Update state with the fetched user list
+    setLoading(false);
+  };
+
+  const prepareChartData = () => {
+    if (!userData.length) return { barData: {}, radarData: {}, lineData: {} };
+    const monthlySignups = Array(12).fill(0); // For 12 months
+    const countryCounts = {};
+    console.log(userData, "userData");
+    userData.forEach((user) => {
+      // Check if the createdAt field exists and is valid
+      if (user.createdAt && user.createdAt.seconds) {
+        const date = new Date(user.createdAt.seconds * 1000); // Convert seconds to milliseconds
+        const month = date.getMonth(); // 0-11
+        if (month >= 0 && month < 12) {
+          monthlySignups[month]++;
+        }
+      }
+
+      // Count users by country
+      const country = user.country || "Unknown"; // Handle null or missing country
+      countryCounts[country] = (countryCounts[country] || 0) + 1;
+    });
+
+    // Bar Data for Monthly Signups
+    const barData = {
+      labels: [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ],
+      datasets: [
+        {
+          label: "Monthly Signups",
+          backgroundColor: colors.popover,
+          borderWidth: 1,
+          hoverBackgroundColor: colors.popoverForeground,
+          data: monthlySignups,
+        },
+      ],
+    };
+
+    // Radar Data for Geographic Distribution
+    const radarData = {
+      labels: Object.keys(countryCounts),
+      datasets: [
+        {
+          label: "Geographic Distribution",
+          data: Object.values(countryCounts),
+          backgroundColor: colors.popoverForeground,
+          borderColor: colors.popover,
+          borderWidth: 2,
+        },
+      ],
+    };
+
+    // Line Data for Growth Over Time (you might need to adjust based on your actual data)
+    const lineData = {
+      labels: [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "November",
+        "December",
+      ],
+      datasets: [
+        {
+          label: "Growth Over Time",
+          fill: false,
+          lineTension: 0.1,
+          backgroundColor: colors.popoverForeground,
+          borderColor: colors.popover,
+          borderCapStyle: "butt",
+          borderWidth: 2,
+          data: monthlySignups, // Just using the first 7 months for example
+        },
+      ],
+    };
+
+    return { barData, radarData, lineData };
+  };
+
+  useEffect(() => {
+    const storedUsers = localStorage.getItem("userList");
+    if (storedUsers) {
+      setUserData(JSON.parse(storedUsers));
+    }
+    refreshData();
+  }, []);
+
+  useEffect(() => {
+    const { barData, radarData, lineData } = prepareChartData();
+    setChartData({ barData, radarData, lineData });
+  }, [userData]);
+
+  const { barData, radarData, lineData } = chartData;
   return (
     <div className="w-full text-center">
-      <h1 className="text-3xl font-bold mb-6">
-        Hello{" "}
-        {currentUser.displayName ? currentUser.displayName : currentUser.email},
-        you are now logged in.
-      </h1>
+      <div className="grid h-full grid-cols-1 sm:grid-cols-2 gap-5 max-w-[100%] mx-auto">
+        {/* Bar Chart */}
+        <Card className="shadow-lg flex flex-col justify-around ">
+          <CardHeader className="mb-auto">
+            <CardTitle className="text-lg font-semibold text-foreground ">
+              Bar Chart
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {barData.labels ? <Bar data={barData} height={250} /> : <p>No data available</p>}
+          </CardContent>
+        </Card>
 
-      <div className="grid grid-cols-2 gap-5 max-w-[80%] mx-auto">
-        <div className="w-full shadow-card p-4 rounded-lg">
-          <h2 className="text-lg font-semibold text-blue-600 mb-2">
-            Pie Chart 1
-          </h2>
-          <Pie
-            data={pieData1}
-            options={{
-            //   width: 250,
-              height: 250,
-            }}
-          />
-        </div>
+        {/* Radar Chart */}
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-foreground">
+              Radar Chart
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex max-h-[400px] justify-center">
+            {radarData.labels ? (
+              <Radar data={radarData} options={radarOptions} />
+            ) : (
+              <p>No data available</p>
+            )}
+          </CardContent>
+        </Card>
 
-        {/* Pie Chart 2 */}
-        <div className="w-full shadow-card p-4 rounded-lg">
-          <h2 className="text-lg font-semibold text-blue-600 mb-2">
-            Pie Chart 2
-          </h2>
-          <Pie data={pieData2} width={250} height={250} />
-        </div>
-
-        <div className="col-span-2 shadow-card p-4 rounded-lg">
-          <div className="w-full mx-auto">
-            <h2 className="text-lg font-semibold text-blue-600 mb-2">
+        {/* Line Chart */}
+        <Card className="col-span-2 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-foreground">
               Line Chart
-            </h2>
-            <Line
-              data={lineData}
-              options={lineOptions}
-              width={800}
-              height={350}
-            />
-          </div>
-        </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {lineData.labels ? (
+              <Line data={lineData} options={lineOptions} height={120} />
+            ) : (
+              <p>No data available</p>
+            )}
+          </CardContent>
+        </Card>
       </div>
-
-      {/* <div className="flex  justify-center gap-4 mb-6">
-        <div className="w-full">
-          <h2 className="text-lg font-semibold text-blue-600 mb-2">
-            Pie Chart 1
-          </h2>
-          <Pie data={pieData1} width={"100%"} />
-        </div>
-
-        <div className="w-full">
-          <h2 className="text-lg font-semibold text-blue-600 mb-2">
-            Pie Chart 2
-          </h2>
-          <Pie data={pieData2} width={"100%"} />
-        </div>
-      </div> */}
-
-      {/* Line Chart */}
-      {/* <div className="w-full max-w-2xl">
-        <h2 className="text-lg font-semibold text-blue-600 mb-2">Line Chart</h2>
-        <Line
-          data={lineData}
-          options={lineOptions}
-          width={"100%"}
-          height={400}
-        />
-      </div> */}
     </div>
   );
 };

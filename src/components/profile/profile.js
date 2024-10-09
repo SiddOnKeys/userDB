@@ -11,6 +11,9 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { auth } from "../../firebase/firebase";
 import { PulseLoader } from "react-spinners";
 import { PencilLine, Pencil } from "lucide-react";
+import { Card, CardHeader, CardTitle } from "../../shadCn/components/card";
+import { Button } from "../../shadCn/components/button";
+import { Input } from "../../shadCn/components/input";
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [loader, setLoader] = useState(false);
@@ -104,10 +107,12 @@ const Profile = () => {
   };
 
   return (
-    <div className="max-w-xl w-full mx-auto p-6 bg-white bg-opacity-70 rounded-lg shadow-card">
-      <h2 className="text-2xl font-bold text-center mb-8 text-blue-600">
-        User Profile
-      </h2>
+    <Card className="max-w-xl w-full mx-auto p-6 rounded-lg shadow-card">
+      <CardHeader>
+        <CardTitle>
+          <h3 className="text-lg">User Profile</h3>
+        </CardTitle>
+      </CardHeader>
 
       <div className="flex justify-center mb-4">
         <div className="relative inline-block">
@@ -120,7 +125,7 @@ const Profile = () => {
             alt="Profile"
             className={`rounded-full w-24 h-24 object-cover cursor-pointer ${
               isEditing
-                ? "border-2 border-blue-600"
+                ? "border-2 border-primary"
                 : "border-2 border-transparent"
             }`}
             onClick={handleProfilePicClick}
@@ -129,22 +134,14 @@ const Profile = () => {
           {isEditing && (
             <div className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow-md">
               <PencilLine
-                className="text-blue-600 cursor-pointer"
+                className="text-background cursor-pointer"
                 onClick={handleProfilePicClick}
               />
             </div>
           )}
         </div>
-        {isEditing && (
-          <button
-            type="button"
-            className="absolute top-0 right-0 bg-blue-600 text-white p-1 rounded-full text-xs"
-            onClick={handleProfilePicClick}
-          >
-            Edit
-          </button>
-        )}
-        <input
+   
+        <Input
           type="file"
           ref={fileInputRef}
           style={{ display: "none" }}
@@ -155,81 +152,78 @@ const Profile = () => {
 
       <div onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block text-gray-700 mb-1" htmlFor="displayName">
+          <label
+            className="block text-secondary-700 mb-1"
+            htmlFor="displayName"
+          >
             Display Name
           </label>
-          <input
+          <Input
             type="text"
             id="displayName"
             name="displayName"
             value={formData.displayName}
             onChange={handleChange}
             disabled={!isEditing}
-            className={`border border-gray-300 p-2 rounded-md w-full ${
-              !isEditing ? "bg-gray-100" : ""
-            }`}
             required
           />
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700 mb-1" htmlFor="email">
+          <label className="block text-secondary-700 mb-1" htmlFor="email">
             Email
           </label>
-          <input
+          <Input
             type="email"
             id="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
             disabled={!isEditing}
-            className={`border border-gray-300 p-2 rounded-md w-full ${
-              !isEditing ? "bg-gray-100" : ""
-            }`}
             required
           />
         </div>
 
         {/* New Password Field */}
         <div className="mb-4">
-          <label className="block text-gray-700 mb-1" htmlFor="newPassword">
+          <label
+            className="block text-secondary-700 mb-1"
+            htmlFor="newPassword"
+          >
             New Password
           </label>
-          <input
+          <Input
             type="password"
             id="newPassword"
             name="newPassword"
             value={formData.newPassword}
             onChange={handleChange}
             disabled={!isEditing}
-            className={`border border-gray-300 p-2 rounded-md w-full ${
-              !isEditing ? "bg-gray-100" : ""
-            }`}
             placeholder="Leave blank to keep current password"
           />
         </div>
 
         <div className="flex justify-center">
           {isEditing ? (
-            <button
+            <Button
               type="submit"
               onClick={handleSubmit}
-              className="bg-blue-600 text-white py-2 px-8 rounded-md shadow-md hover:bg-blue-700 transition mx-2"
+              className=" text-white px-8 rounded-md shadow-md"
             >
               {loader ? <PulseLoader size={10} color="white" /> : "Submit"}
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
               type="button"
               onClick={toggleEdit}
-              className= "flex items-center gap-2 bg-blue-600 text-white py-2 px-8 rounded-md shadow-md hover:bg-blue-700 transition mx-2"
+              className="flex items-center gap-2 text-white px-8 rounded-md shadow-md transition mx-2"
             >
-              <Pencil size={16}/> Edit
-            </button>
+              <Pencil size={16} /> Edit
+            </Button>
           )}
         </div>
       </div>
-    </div>
+    </Card>
   );
 };
 

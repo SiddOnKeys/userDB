@@ -1,20 +1,44 @@
 import React, { useState } from "react";
 import { useAuth } from "../../contexts/authContext";
 import { db } from "../../firebase/firebase";
-import { collection, addDoc } from "firebase/firestore"; // Import Firestore functions
+import { collection, addDoc, serverTimestamp } from "firebase/firestore"; // Import Firestore functions
 import Notiflix from "notiflix";
 import { PuffLoader, PulseLoader } from "react-spinners";
 import { countries } from "../../utils/countries";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../shadCn/components/card";
+import { Button } from "../../shadCn/components/button";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "../../shadCn/components/select";
+import { Input } from "../../shadCn/components/input";
+import { RadioGroupItem, RadioGroup } from "../../shadCn/components/radio";
 
 const Contact = () => {
   const { currentUser } = useAuth();
   const [loader, setLoader] = useState(false);
+
+
+
+
   // State to manage form inputs
   const [formData, setFormData] = useState({
+    name: currentUser.displayName || "",
     country: "",
-    phoneNumber: "",
-    email: "",
-    contactType: "office", // Default value
+    phoneNumber: currentUser.phoneNumber || null,
+    email: currentUser.email || "",
+    contactType: "office",
+    createdAt: serverTimestamp(),
   });
   const [errors, setErrors] = useState({
     phoneNumber: "",
@@ -54,9 +78,15 @@ const Contact = () => {
 
   // Handle form submission
   const handleSubmit = async (e) => {
-    setLoader(true);
     e.preventDefault(); // Prevent default form submission behavior
-
+    if (formData.country === "") {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        country: "Please select your country",
+      }));
+      return;
+    }
+    setLoader(true);
     try {
       // Add the form data to the Firestore collection
       await addDoc(collection(db, "contacts"), formData);
@@ -83,110 +113,143 @@ const Contact = () => {
   };
 
   return (
-    <div className="max-w-xl w-full mx-auto p-6 bg-white bg-opacity-70 rounded-lg shadow-card">
-      <h2 className="text-2xl font-bold text-center mb-8 text-blue-600">
-        Please submit your contact details.
-      </h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-1" htmlFor="country">
-            Country
-          </label>
-          <select
-            id="country"
-            name="country"
-            value={formData.country}
-            onChange={handleChange}
-            className="border border-gray-300 p-2 rounded-md w-full"
-            required
-          >
-            <option value="" disabled>
-              Select your country
-            </option>
-            {countries.map((item) => (
-              <option key={item.code} value={item.name}>
-                {item.name}
-              </option>
-            ))}
-            {/* Add more countries as needed */}
-          </select>
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-1" htmlFor="phoneNumber">
-            Phone Number
-          </label>
-          <input
-            type="number" // Change to text for custom validation
-            id="phoneNumber"
-            name="phoneNumber"
-            value={formData.phoneNumber}
-            onChange={handleChange}
-            className={`border border-gray-300 p-2 rounded-md w-full ${
-              errors.phoneNumber ? "border-red-500" : ""
-            }`}
-            placeholder="Enter your phone number"
-            required
-          />
-          {errors.phoneNumber && (
-            <p className="text-red-500 text-sm mt-1">{errors.phoneNumber}</p>
-          )}
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-1" htmlFor="email">
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="border border-gray-300 p-2 rounded-md w-full"
-            placeholder="Enter your email address"
-            required
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2">Contact Type</label>
-          <div className="flex gap-4">
-            <label>
-              <input
-                type="radio"
-                name="contactType"
-                value="office"
-                checked={formData.contactType === "office"}
-                onChange={handleChange}
-                className="mr-2"
-              />
-              Office
+    <Card className="max-w-xl w-full mx-auto p-6">
+      <CardHeader>
+        <CardTitle>
+          <h3 className="text-lg">Please submit your contact details.</h3>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block  mb-1" htmlFor="email">
+              Name
             </label>
-            <label>
-              <input
-                type="radio"
-                name="contactType"
-                value="home"
-                checked={formData.contactType === "home"}
-                onChange={handleChange}
-                className="mr-2"
-              />
-              Home
-            </label>
+            <Input
+              type="name"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className=" w-full"
+              placeholder="Enter your name"
+              required
+            />
           </div>
-        </div>
+          <div className="mb-4">
+            <label className="block  mb-1" htmlFor="country">
+              Country
+            </label>
+            <Select
+              value={formData.country}
+              onValueChange={(value) => {
+                setFormData({ ...formData, country: value });
+                setErrors((prev) => ({ ...prev, country: false }));
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select your country" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Countries</SelectLabel>
+                  {countries.map((item) => (
+                    <SelectItem key={item.code} value={item.name}>
+                      {item.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            {errors.country && !formData.country && (
+              <p className="text-red-500 text-sm mt-1">{errors.country}</p>
+            )}
+          </div>
 
-        <div className="w-full flex">
-          <button
-            type="submit"
-            className="bg-blue-600 text-white py-2 px-8 rounded-md shadow-md hover:bg-blue-700 transition mx-auto w-50"
-          >
-            {loader ? <PulseLoader size={10} color="white" /> : "Submit"}
-          </button>
-        </div>
-      </form>
-    </div>
+          <div className="mb-4">
+            <label className="block  mb-1" htmlFor="phoneNumber">
+              Phone Number
+            </label>
+            <Input
+              type="number" // Changed to tel for better mobile compatibility
+              id="phoneNumber"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              className={` w-full ${
+                errors.phoneNumber ? "border-red-500" : ""
+              }`}
+              placeholder="Enter your phone number"
+              required
+            />
+            {errors.phoneNumber && (
+              <p className="text-red-500 text-sm mt-1">{errors.phoneNumber}</p>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <label className="block  mb-1" htmlFor="email">
+              Email
+            </label>
+            <Input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className=" w-full"
+              placeholder="Enter your email address"
+              required
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block  mb-2">Contact Type</label>
+            <RadioGroup
+              value={formData.contactType}
+              className="flex flex-row-reverse space-y-1 items-start justify-end gap-4"
+              onValueChange={(value) =>
+                setFormData({ ...formData, contactType: value })
+              }
+            >
+              <div className="flex flex-col gap-4">
+                {" "}
+                <p>Office</p>
+                <p>Home</p>
+              </div>
+              <div className="flex flex-col gap-5 ">
+                <RadioGroupItem
+                  value="office"
+                  id="contact-type-office"
+                  className="flex items-center h6 w6"
+                >
+                  <input type="radio" className="hidden" />
+                  <label htmlFor="contact-type-office" className="ml-2">
+                    Office
+                  </label>
+                </RadioGroupItem>
+                <RadioGroupItem
+                  value="home"
+                  id="contact-type-home"
+                  className="flex items-center"
+                >
+                  <input type="radio" className="hidden" />
+                  <label htmlFor="contact-type-home" className="ml-2">
+                    Home
+                  </label>
+                </RadioGroupItem>
+              </div>
+            </RadioGroup>
+          </div>
+
+          <div className="w-full flex">
+            <Button type="submit" size={"lg"} className="mx-auto">
+              {loader ? <PulseLoader size={10} color="white" /> : "Submit"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 

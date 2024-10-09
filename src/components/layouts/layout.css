@@ -1,5 +1,5 @@
 .custom-bg {
-  background-size: 7em 16em;
-  background-image: linear-gradient(90deg, #1e1e1e0a 1px, transparent 0),
-    linear-gradient(180deg, #1e1e1e0a 1px, transparent 0);
+  background-size: 6em 9em;
+  background-image: linear-gradient(90deg, #9090901a 1px, transparent 0),
+    linear-gradient(360deg, #9090901a 1px, transparent 0%);
 }
