@@ -8,7 +8,7 @@ const Home = () => {
   return (
     <div
       className="flex flex-col justify-center items-center w-full text-primary-900 bg-cover bg-center"
-      style={{ backgroundImage: `url('/path-to-your-image.png')` }} // Replace this with the actual image path
+      style={{ backgroundImage: `url('/path-to-your-image.png')` }}
     >
       <Card>
         <div className=" bg-opacity-70 p-16 rounded-md shadow-card">

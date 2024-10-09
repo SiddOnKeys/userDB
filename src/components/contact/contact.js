@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../../contexts/authContext";
 import { db } from "../../firebase/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore"; // Import Firestore functions
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import Notiflix from "notiflix";
 import { PuffLoader, PulseLoader } from "react-spinners";
 import { countries } from "../../utils/countries";
@@ -28,10 +28,6 @@ const Contact = () => {
   const { currentUser } = useAuth();
   const [loader, setLoader] = useState(false);
 
-
-
-
-  // State to manage form inputs
   const [formData, setFormData] = useState({
     name: currentUser.displayName || "",
     country: "",
@@ -44,14 +40,12 @@ const Contact = () => {
     phoneNumber: "",
   });
 
-  // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     if (name === "phoneNumber") {
-      const phoneNumberPattern = /^[0-9]*$/; // Only digits allowed
+      const phoneNumberPattern = /^[0-9]*$/;
 
-      // Validate length and pattern
       if (value.length > 10) {
         setErrors((prevErrors) => ({
           ...prevErrors,
@@ -65,7 +59,7 @@ const Contact = () => {
       } else {
         setErrors((prevErrors) => ({
           ...prevErrors,
-          phoneNumber: "", // Clear error if valid
+          phoneNumber: "",
         }));
       }
     }
@@ -76,9 +70,8 @@ const Contact = () => {
     }));
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form submission behavior
+    e.preventDefault();
     if (formData.country === "") {
       setErrors((prevErrors) => ({
         ...prevErrors,
@@ -88,13 +81,12 @@ const Contact = () => {
     }
     setLoader(true);
     try {
-      // Add the form data to the Firestore collection
       await addDoc(collection(db, "contacts"), formData);
       Notiflix.Report.success(
         "Contact Submitted!",
         "You can find the updated DB in the Users tab!"
       );
-      // Optionally reset the form after submission
+
       setFormData({
         country: "",
         phoneNumber: "",
@@ -171,7 +163,7 @@ const Contact = () => {
               Phone Number
             </label>
             <Input
-              type="number" // Changed to tel for better mobile compatibility
+              type="number"
               id="phoneNumber"
               name="phoneNumber"
               value={formData.phoneNumber}

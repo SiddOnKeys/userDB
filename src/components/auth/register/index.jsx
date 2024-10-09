@@ -6,23 +6,26 @@ import { CardTitle } from "../../../shadCn/components/card";
 import { Button } from "../../../shadCn/components/button";
 import { Input } from "../../../shadCn/components/input";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
+import Notiflix from "notiflix";
 const Register = () => {
-  const navigate = useNavigate();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setconfirmPassword] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
   const { userLoggedIn } = useAuth();
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!isRegistering) {
-      setIsRegistering(true);
-      await doCreateUserWithEmailAndPassword(email, password);
+    try {
+      if (!isRegistering) {
+        setIsRegistering(true);
+        await doCreateUserWithEmailAndPassword(email, password);
+      }
+    } catch (error) {
+      Notiflix.Notify.failure("Oops! ", error.message);
+      setErrorMessage(error.message);
     }
   };
 
@@ -86,7 +89,7 @@ const Register = () => {
                   </span>
                 </Button>
 
-                {/* hides browsers password toggles */}
+               
                 <style>{`
           .hide-password-toggle::-ms-reveal,
           .hide-password-toggle::-ms-clear {
@@ -96,17 +99,6 @@ const Register = () => {
           }
         `}</style>
               </div>
-              {/* <Input
-                disabled={isRegistering}
-                type="password"
-                autoComplete="new-password"
-                required
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                }}
-                className=""
-              /> */}
             </div>
 
             <div>
@@ -127,7 +119,7 @@ const Register = () => {
             </div>
 
             {errorMessage && (
-              <span className="text-red-500">{errorMessage}</span>
+              <span className="text-red-500 text-sm">{errorMessage}</span>
             )}
 
             <Button

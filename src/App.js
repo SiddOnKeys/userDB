@@ -1,5 +1,5 @@
 import Header from "./components/header";
-import "./App.css"
+import "./App.css";
 import { AuthProvider } from "./contexts/authContext";
 import { BrowserRouter, Router, RouterProvider } from "react-router-dom";
 import routes from "./Routes/routes";

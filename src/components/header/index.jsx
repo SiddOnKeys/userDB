@@ -5,12 +5,6 @@ import { doSignOut } from "../../firebase/auth";
 import { NavLink } from "react-router-dom";
 import { Button } from "../../shadCn/components/button";
 import { Users } from "lucide-react";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../../shadCn/components/tabs";
 const Header = () => {
   const navigate = useNavigate();
   const { userLoggedIn } = useAuth();
@@ -79,7 +73,7 @@ const TabNavigation = () => {
           className={({ isActive }) =>
             `px-3 py-2 rounded transition ${
               isActive
-                ? "bg-accent bg-background text-primary-foreground"
+                ? " bg-background text-primary-foreground"
                 : " hover:bg-popover"
             } `
           }
@@ -90,44 +84,3 @@ const TabNavigation = () => {
     </div>
   );
 };
-// const TabNavigation = () => {
-//   const routes = [
-//     { path: "/home", label: "Home" },
-//     { path: "/dashboard", label: "Dashboard" },
-//     { path: "/users", label: "Users" },
-//     { path: "/contact", label: "Contact" },
-//     { path: "/profile", label: "Profile" },
-//   ];
-
-//   return (
-//     <Tabs defaultValue={routes[0].path} className="w-full">
-//       <TabsList className="flex gap-x-4 justify-center bg-background text-muted-foreground p-2 border-b border-primary">
-//         {routes.map((route) => (
-//           <TabsTrigger
-//             key={route.path}
-//             value={route.path}
-//             className="cursor-pointer transition-colors"
-//           >
-//             <NavLink
-//               to={route.path}
-//               className={({ isActive }) =>
-//                 `px-4 py-2 rounded-md transition-colors duration-200 ${
-//                   isActive
-//                     ? "bg-accent text-accent-foreground"
-//                     : "hover:bg-muted"
-//                 }`
-//               }
-//             >
-//               {route.label}
-//             </NavLink>
-//           </TabsTrigger>
-//         ))}
-//       </TabsList>
-//       {routes.map((route) => (
-//         <TabsContent key={route.path} value={route.path}>
-//           {/* You can add the content for each tab here if needed */}
-//         </TabsContent>
-//       ))}
-//     </Tabs>
-//   );
-// };

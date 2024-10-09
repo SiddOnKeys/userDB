@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { useAuth } from "../../contexts/authContext";
-import { updateProfile, updatePassword } from "firebase/auth"; // Import updatePassword
-import Notiflix from "notiflix"; // Optional: For notifications
+import { updateProfile, updatePassword } from "firebase/auth";
+import Notiflix from "notiflix";
 import {
   doPasswordChange,
   doUpdateEmail,
   doUpdateProfile,
 } from "../../firebase/auth";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Import Firebase Storage
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { auth } from "../../firebase/firebase";
 import { PulseLoader } from "react-spinners";
 import { PencilLine, Pencil } from "lucide-react";
@@ -20,11 +20,11 @@ const Profile = () => {
   const [formData, setFormData] = useState({
     displayName: auth.currentUser.displayName || "",
     email: auth.currentUser.email || "",
-    newPassword: "", // State for new password
+    newPassword: "",
   });
-  const [file, setFile] = useState(null); // State for file input
-  const [previewURL, setPreviewURL] = useState(""); // State for preview URL
-  const fileInputRef = React.useRef(null); // Ref to trigger file input
+  const [file, setFile] = useState(null);
+  const [previewURL, setPreviewURL] = useState("");
+  const fileInputRef = React.useRef(null);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -37,7 +37,6 @@ const Profile = () => {
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
 
-    // Create a preview URL for the selected file
     if (selectedFile) {
       const fileURL = URL.createObjectURL(selectedFile);
       setPreviewURL(fileURL);
@@ -49,7 +48,7 @@ const Profile = () => {
   };
   const handleProfilePicClick = () => {
     if (isEditing) {
-      fileInputRef.current.click(); // Trigger file input click
+      fileInputRef.current.click();
     }
   };
 
@@ -59,7 +58,6 @@ const Profile = () => {
     console.log(auth.currentUser, "auth.currentUser");
 
     try {
-      // Update user profile in Firebase Auth
       if (file) {
         const storage = getStorage();
         const storageRef = ref(
@@ -67,37 +65,31 @@ const Profile = () => {
           `profilePictures/${auth.currentUser.uid}`
         );
 
-        // Upload file
         await uploadBytes(storageRef, file);
 
-        // Get the download URL
         const downloadURL = await getDownloadURL(storageRef);
 
-        // Update the user profile with the new photo URL
         await updateProfile(auth.currentUser, {
           displayName: formData.displayName,
-          photoURL: downloadURL, // Update photoURL with the new download URL
+          photoURL: downloadURL,
         });
       } else {
-        // Update only the display name if no file is selected
         await doUpdateProfile({
           displayName: formData.displayName,
           photoURL: auth.currentUser.photoURL,
         });
       }
 
-      // Update email if provided
       if (formData.email !== auth.currentUser.email) {
         await doUpdateEmail(formData.email);
       }
 
-      // Update password if provided
       if (formData.newPassword) {
         await doPasswordChange(formData.newPassword);
       }
 
       Notiflix.Notify.success("Profile updated successfully!");
-      toggleEdit(); // Exit edit mode after saving
+      toggleEdit();
     } catch (error) {
       console.error("Error updating profile: ", error);
       Notiflix.Notify.failure("Error updating profile: " + error.message);
@@ -140,7 +132,7 @@ const Profile = () => {
             </div>
           )}
         </div>
-   
+
         <Input
           type="file"
           ref={fileInputRef}
@@ -184,7 +176,6 @@ const Profile = () => {
           />
         </div>
 
-        {/* New Password Field */}
         <div className="mb-4">
           <label
             className="block text-secondary-700 mb-1"

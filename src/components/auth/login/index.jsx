@@ -6,7 +6,7 @@ import {
 } from "../../../firebase/auth";
 import { useAuth } from "../../../contexts/authContext";
 import Notiflix from "notiflix";
-import { Card, CardHeader, CardTitle } from "../../../shadCn/components/card";
+import { CardTitle } from "../../../shadCn/components/card";
 import { Button } from "../../../shadCn/components/button";
 import { Input } from "../../../shadCn/components/input";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
@@ -28,10 +28,10 @@ const Login = () => {
         await doSignInWithEmailAndPassword(email, password);
       } catch (error) {
         Notiflix.Notify.failure("Error logging in: " + error.message);
+        setErrorMessage(error.message);
       } finally {
         setIsSigningIn(false);
       }
-      // doSendEmailVerification()
     }
   };
 
@@ -48,7 +48,6 @@ const Login = () => {
   return (
     <>
       {userLoggedIn && <Navigate to={"/home"} replace={true} />}
-
       <main className="w-full flex self-center place-content-center place-items-center">
         <div className="w-96 text-secondary-600 space-y-5 p-4 shadow-xl border rounded-xl">
           <div className="text-center">
@@ -71,13 +70,12 @@ const Login = () => {
                 onChange={(e) => {
                   setEmail(e.target.value);
                 }}
+                disabled={isSigningIn}
                 className=""
               />
             </div>
-
             <div>
               <label className="text-sm text-secondary-500 ">Password</label>
-
               <div className="relative">
                 <Input
                   type={showPassword ? "text" : "password"}
@@ -110,7 +108,6 @@ const Login = () => {
                   </span>
                 </Button>
 
-                {/* hides browsers password toggles */}
                 <style>{`
           .hide-password-toggle::-ms-reveal,
           .hide-password-toggle::-ms-clear {
@@ -120,19 +117,10 @@ const Login = () => {
           }
         `}</style>
               </div>
-              {/* <Input
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                }}
-              /> */}
             </div>
 
             {errorMessage && (
-              <span className="text-red-600 font-bold">{errorMessage}</span>
+              <span className="text-red-600 text-sm ">{errorMessage}</span>
             )}
 
             <Button

@@ -9,11 +9,10 @@ import Contact from "../components/contact/contact";
 import UserList from "../components/userList/userList";
 import Home from "../components/home";
 
-// Create a browser router with the defined routes
 const routes = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />, // Use Layout as the main wrapper
+    element: <Layout />,
     children: [
       {
         path: "",
@@ -72,7 +71,7 @@ const routes = createBrowserRouter([
 
       {
         path: "*",
-        element: <Login />, // Catch-all route
+        element: <Login />,
       },
     ],
   },

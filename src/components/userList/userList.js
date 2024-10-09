@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../../firebase/firebase";
 import { collection, getDocs } from "firebase/firestore";
-import { Button } from "../../shadCn/components/button.jsx"; // Shadcn Button
+import { Button } from "../../shadCn/components/button.jsx";
 import Flag from "react-world-flags";
 import {
   Table,
@@ -10,13 +10,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../../shadCn/components/table"; // Shadcn Table components
+} from "../../shadCn/components/table";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "../../shadCn/components/card.jsx"; // Shadcn Card components
+} from "../../shadCn/components/card.jsx";
 import { Copy } from "lucide-react";
 import { truncate } from "../../utils/string";
 import Notiflix from "notiflix";
@@ -35,18 +35,16 @@ const UserList = () => {
   const refreshData = async () => {
     setLoading(true);
     const userList = await doGetUserList();
-    setUsers(userList); // Update state with the fetched user list
+    setUsers(userList);
     setLoading(false);
   };
 
   useEffect(() => {
-    // Check localStorage for existing users
     const storedUsers = localStorage.getItem("userList");
     if (storedUsers) {
-      setUsers(JSON.parse(storedUsers)); // Parse and set the users from localStorage
+      setUsers(JSON.parse(storedUsers));
     }
 
-    // Fetch new data from Firestore
     refreshData();
   }, []);
   return (
@@ -106,7 +104,6 @@ const UserList = () => {
                   </TableCell>
                   <TableCell className="flex gap-2">
                     <Flag
-                      // height="16px"
                       width="32px"
                       code={
                         countries.filter(

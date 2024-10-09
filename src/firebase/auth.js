@@ -26,8 +26,6 @@ export const doSignInWithGoogle = async () => {
   const result = await signInWithPopup(auth, provider);
   const user = result.user;
   console.log(user, "google user signin");
-
-  // add user to firestore
 };
 
 export const doSignOut = () => {
@@ -54,12 +52,11 @@ export const doGetUserList = async () => {
       userList.push({ id: doc.id, ...doc.data() });
     });
 
-    // Stringify the userList before saving to localStorage
     localStorage.setItem("userList", JSON.stringify(userList));
-    return userList; // Return the userList for use in the calling function
+    return userList;
   } catch (error) {
     Notiflix.Notify.failure(error.message || "Failed to fetch users list");
-    return []; // Return an empty array in case of an error
+    return [];
   }
 };
 export const doSendEmailVerification = () => {
